@@ -1,0 +1,148 @@
+	mysql> show databases;
+	+--------------------+
+	| Database           |
+	+--------------------+
+	| information_schema |
+	| mysql              |
+	| payroll_service    |
+	| performance_schema |
+	| sakila             |
+	| sys                |
+	| world              |
+	+--------------------+
+	7 rows in set (0.00 sec)
+
+	mysql> use payroll_service;
+	Database changed
+	mysql> select database();
+	+-----------------+
+	| database()      |
+	+-----------------+
+	| payroll_service |
+	+-----------------+
+	1 row in set (0.00 sec)
+
+	mysql> create table employee_payroll(
+		->      id int unsigned not null AUTO_INCREMENT,
+		->      name varchar(150) not null,
+		->      salary Double not null,
+		->      start DATE not null,
+		->      PRIMARY KEY (id)
+		-> );
+	Query OK, 0 rows affected (0.07 sec)
+	
+	mysql> DESCRIBE employee_payroll;
+	+--------+--------------+------+-----+---------+----------------+
+	| Field  | Type         | Null | Key | Default | Extra          |
+	+--------+--------------+------+-----+---------+----------------+
+	| id     | int unsigned | NO   | PRI | NULL    | auto_increment |
+	| name   | varchar(150) | NO   |     | NULL    |                |
+	| salary | double       | NO   |     | NULL    |                |
+	| start  | date         | NO   |     | NULL    |                |
+	+--------+--------------+------+-----+---------+----------------+
+	4 rows in set (0.01 sec)
+	
+	mysql> INSERT INTO employee_payroll (name,salary,start) VALUES
+    -> ('Bill',100000,'2018-01-03'),
+    -> ('Trump',50000,'2019-11-13'),
+    -> ('arab',55532,'2020-06-23');
+	Query OK, 3 rows affected (0.01 sec)
+	Records: 3  Duplicates: 0  Warnings: 0
+	
+	
+	mysql> select * from employee_payroll;
+	+----+-------+--------+------------+
+	| id | name  | salary | start      |
+	+----+-------+--------+------------+
+	|  1 | Bill  | 100000 | 2018-01-03 |
+	|  2 | Trump |  50000 | 2019-11-13 |
+	|  3 | arab  |  55532 | 2020-06-23 |
+	+----+-------+--------+------------+
+	3 rows in set (0.00 sec)
+
+	mysql> select * from employee_payroll where name = 'bill';
+	+----+------+--------+------------+
+	| id | name | salary | start      |
+	+----+------+--------+------------+
+	|  1 | Bill | 100000 | 2018-01-03 |
+	+----+------+--------+------------+
+	1 row in set (0.00 sec)
+
+	mysql> select * from employee_payroll where start between cast('2018-01-01' AS DATE) AND DATE(NOW());
+	+----+-------+--------+------------+
+	| id | name  | salary | start      |
+	+----+-------+--------+------------+
+	|  1 | Bill  | 100000 | 2018-01-03 |
+	|  2 | Trump |  50000 | 2019-11-13 |
+	|  3 | arab  |  55532 | 2020-06-23 |
+	+----+-------+--------+------------+
+	3 rows in set (0.00 sec)
+	
+	mysql> ALTER TABLE  employee_payroll add gender char(1) AFTER name;
+	Query OK, 0 rows affected (0.13 sec)
+	Records: 0  Duplicates: 0  Warnings: 0
+
+	mysql> DESCRIBE employee_payroll;
+	+--------+--------------+------+-----+---------+----------------+
+	| Field  | Type         | Null | Key | Default | Extra          |
+	+--------+--------------+------+-----+---------+----------------+
+	| id     | int unsigned | NO   | PRI | NULL    | auto_increment |
+	| name   | varchar(150) | NO   |     | NULL    |                |
+	| gender | char(1)      | YES  |     | NULL    |                |
+	| salary | double       | NO   |     | NULL    |                |
+	| start  | date         | NO   |     | NULL    |                |
+	+--------+--------------+------+-----+---------+----------------+
+	5 rows in set (0.01 sec)
+	
+	mysql> UPDATE employee_payroll SET gender = 'F' WHERE name = 'Bill';
+	Query OK, 1 row affected (0.01 sec)
+	Rows matched: 1  Changed: 1  Warnings: 0
+	
+	mysql> UPDATE employee_payroll SET gender = 'M' WHERE name = 'Trump' or name = 'Arjun';
+	Query OK, 2 rows affected (0.01 sec)
+	Rows matched: 2  Changed: 2  Warnings: 0
+
+	mysql> select * from employee_payroll;
+	+----+-------+--------+--------+------------+
+	| id | name  | gender | salary | start      |
+	+----+-------+--------+--------+------------+
+	|  1 | Bill  | F      | 100000 | 2018-01-03 |
+	|  2 | Trump | M      |  50000 | 2019-11-13 |
+	|  3 | Arjun | M      |  55532 | 2020-06-23 |
+	+----+-------+--------+--------+------------+
+	3 rows in set (0.00 sec)
+	
+	mysql> select AVG(salary) FROM employee_payroll where gender = 'M' GROUP BY gender;
+	+-------------+
+	| AVG(salary) |
+	+-------------+
+	|       52766 |
+	+-------------+
+	1 row in set (0.02 sec)
+	
+	mysql> select gender, AVG(salary) FROM employee_payroll where gender = 'M' GROUP BY gender;
+	+--------+-------------+
+	| gender | AVG(salary) |
+	+--------+-------------+
+	| M      |       52766 |
+	+--------+-------------+
+	1 row in set (0.00 sec)
+	
+	
+	mysql> select gender, COUNT(name) FROM employee_payroll  GROUP BY gender;
+	+--------+-------------+
+	| gender | COUNT(name) |
+	+--------+-------------+
+	| F      |           1 |
+	| M      |           2 |
+	+--------+-------------+
+	2 rows in set (0.00 sec)
+	
+	mysql> select gender, SUM(salary) FROM employee_payroll  GROUP BY gender;
+	+--------+-------------+
+	| gender | SUM(salary) |
+	+--------+-------------+
+	| F      |      100000 |
+	| M      |      105532 |
+	+--------+-------------+
+	2 rows in set (0.00 sec)
